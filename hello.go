@@ -1,9 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/NodeJS_Golang/stringutil"
+)
 
 func main() {
-	fmt.Printf("Hello, world.\n")
-    fmt.Printf("whats going on")
-    fmt.Printf("again testing")
+	fmt.Printf(stringutil.Reverse("!oG ,olleH"))
 }
