@@ -14,7 +14,7 @@ var authenticate = require('./routes/authenticate')(passport);
 var mongoose = require('mongoose');
 
  //connect to mongodb 
- mongoose.connect("mongodb://localhost:27017/explorePhotos");
+// mongoose.connect("mongodb://localhost:27017/explorePhotos");
 
 var app = express();
 
