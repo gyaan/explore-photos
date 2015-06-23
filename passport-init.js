@@ -22,12 +22,14 @@ module.exports = function(passport){
     function(req, username, password, done) { 
 
         if(!users[username]){
-          return done('user name not found', false);    
+          console.log('user name not found with username'+username);
+          return done(null, false);    
       }
             //is valid password
             if(!isValidPassword(users[username],password)){
-             return done('user password is not valid',false) 
-         }
+               console.log('invalid username and password');
+               return done(null,false) 
+           }
 
              //successfull logged in 
 
@@ -43,18 +45,19 @@ module.exports = function(passport){
         function(req, username, password, done) {
 
           //check if user is there or not 
-
           if(users[username]){
-            return done(null,"username is already exit");
+            console.log("user name already exist")
+            return done(null,false);
         }
            //add user to db
 
            users[username]={
             username:username,
             password:createHash(password)
-        };
+        };      
 
-        return done(null,users[username]);
+          console.log(users[username].username + 'registerd successfully');
+          return done(null,users[username]);
 
     })
     );

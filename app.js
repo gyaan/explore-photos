@@ -1,6 +1,3 @@
-//app.js for Node.js server
-
-
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
