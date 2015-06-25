@@ -15,8 +15,18 @@ type user struct {
 }
 
 type errorMessage struct {
-	Message string `json:message`
 	Status  string `json:status`
+	Message string `json:message`
+}
+
+type successMessage struct {
+	Status string `json:status`
+	User   user
+}
+
+type photosResponse struct {
+	Status string  `json:status`
+	Photos []photo `json:photos`
 }
 
 type photo struct {
@@ -24,106 +34,130 @@ type photo struct {
 	Url string        `json:url`
 }
 
-func sel(q ...string) (r bson.M) {
-	r = make(bson.M, len(q))
-	for _, s := range q {
-		r[s] = 1
-	}
-	return
-}
-
 var database *mgo.Session
 
-func usersHandler(w http.ResponseWriter, r *http.Request) {
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		username := r.PostFormValue("username")
+		password := r.PostFormValue("password")
+		existingUser := user{username, password}
 
-	switch r.Method {
-	case "GET": //this will use for login
-		{
+		result := user{}
+		uc := database.DB("explorePhotos").C("users")
+		err := uc.Find(bson.M{"username": username, "password": password}).One(&result)
+		if err != nil {
+			fmt.Println(err)
+		}
 
-			loggedinUser := user{"gyani", "gyani123"}
+		if result != (user{}) { //register user here
 
-			fmt.Println(loggedinUser.Password)
-			js, err := json.Marshal(loggedinUser)
-
+			returnMessage := successMessage{"success", existingUser}
+			js, err := json.Marshal(returnMessage)
 			if err != nil {
 				panic(err)
-				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(js)
+		} else { //invalid user name and password
+			returnError := errorMessage{"unsuccess", "user doesn't exist"}
+			js, err := json.Marshal(returnError)
+			if err != nil {
+				panic(err)
 			}
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(js)
 		}
 
+	} else {
+		returnError := errorMessage{"unsuccess", "method not defind"}
+		js, err := json.Marshal(returnError)
+		if err != nil {
+			panic(err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
+}
+
+func usersHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+
 	case "POST":
 		{
 
-			// userName:=r.PostFormValue('userName')
-			// passWord:=r.PostFormValue('password')
-			// newUser := user{userName,passWord}
+			username := r.PostFormValue("username")
+			password := r.PostFormValue("password")
+			newUser := user{username, password}
 
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(js)
-			// Create a new record.
+			//check if user is alreayd exist
+			uc := database.DB("explorePhotos").C("users")
+			result := user{}
+			err := uc.Find(bson.M{"username": username, "password": password}).One(&result)
+			if err != nil {
+				fmt.Println(err)
+			}
 
-		}
+			if result == (user{}) { //register user here
+				err = uc.Insert(&user{Username: username, Password: password})
+				if err != nil {
+					panic(err)
+				}
+				returnMessage := successMessage{"success", newUser}
+				js, err := json.Marshal(returnMessage)
+				if err != nil {
+					panic(err)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
 
-	case "DELETE":
-		{ // Remove the record.
-			fmt.Println("inside delete method")
+			} else { //send message user is already exist
+				returnError := errorMessage{"unsuccess", "user already registerd"}
+				js, err := json.Marshal(returnError)
+				if err != nil {
+					panic(err)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
+			}
+
 		}
 
 	default:
 		{
-			fmt.Println("no method")
+			returnError := errorMessage{"unsuccess", "method not defind"}
+			js, err := json.Marshal(returnError)
+			if err != nil {
+				panic(err)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(js)
 		}
 	}
 
 }
 
 func photosHandler(w http.ResponseWriter, r *http.Request) {
+
 	switch r.Method {
-	case "GET": //this will use for login
+	case "GET":
 		{
 
-			loggedinUser := user{"gyani", "gyani123"}
-
-			fmt.Println(loggedinUser.Password)
-			js, err := json.Marshal(loggedinUser)
-
+			c := database.DB("explorePhotos").C("photos")
+			result := []photo{}
+			err := c.Find(bson.M{}).All(&result)
 			if err != nil {
 				panic(err)
-				return
+			}
+
+			response := photosResponse{"success", result}
+
+			js, err := json.Marshal(response)
+			if err != nil {
+				panic(err)
 			}
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(js)
-		}
-
-	case "POST":
-		{
-
-			// userName:=r.PostFormValue('userName')
-			// passWord:=r.PostFormValue('password')
-			// newUser := user{userName,passWord}
-
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(js)
-			// Create a new record.
-
-		}
-
-	case "DELETE":
-		{ // Remove the record.
-			fmt.Println("inside delete method")
-		}
-
-	default:
-		{
-			fmt.Println("no method")
-		}
-	}
-	switch r.Method {
-	case "GET": //this will use for login
-		{
-			fmt.Println("inside get method")
 		}
 
 	case "POST":
@@ -147,34 +181,18 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	//create connection with mongo db
-	database, err := mgo.Dial("localhost")
+	session, err := mgo.Dial("localhost")
 
 	if err != nil {
 		panic(err)
 	}
-	defer database.Close()
+	defer session.Close()
 
-	//mongo quries
-	c := database.DB("explorePhotos").C("photos")
-
-	// Query One
-	result := photo{}
-	// err = c.Find(bson.M{"url": "https://c1.staticflickr.com/1/438/19053518062_7838ff75c1_k.jpg"}).Select(bson.M{"_id": 0}).One(&result)
-	err = c.Find(bson.M{"url": "https://c1.staticflickr.com/1/438/19053518062_7838ff75c1_k.jpg"}).One(&result)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(result.Url)
-
-	// Insert Datas
-	uc := database.DB("explorePhotos").C("users")
-	err = uc.Insert(&user{Username: "gyani", Password: "123"})
-
-	if err != nil {
-		panic(err)
-	}
+	database = session
 
 	http.HandleFunc("/users", usersHandler)
+	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/photos", photosHandler)
 	http.ListenAndServe(":1334", nil)
 
 }
