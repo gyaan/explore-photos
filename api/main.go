@@ -14,6 +14,12 @@ type user struct {
 	Password string `json:password`
 }
 
+type userResponse struct {
+	Id       bson.ObjectId `bson:"_id,omitempty"`
+	Username string        `json:username`
+	Password string        `json:password`
+}
+
 type errorMessage struct {
 	Status  string `json:status`
 	Message string `json:message`
@@ -21,7 +27,7 @@ type errorMessage struct {
 
 type successMessage struct {
 	Status string `json:status`
-	User   user
+	User   userResponse
 }
 
 type photosResponse struct {
@@ -40,16 +46,17 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		username := r.PostFormValue("username")
 		password := r.PostFormValue("password")
-		existingUser := user{username, password}
 
-		result := user{}
+		result := userResponse{}
 		uc := database.DB("explorePhotos").C("users")
 		err := uc.Find(bson.M{"username": username, "password": password}).One(&result)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		if result != (user{}) { //register user here
+		if result != (userResponse{}) { //register user here
+
+			existingUser := userResponse{result.Id, username, password}
 
 			returnMessage := successMessage{"success", existingUser}
 			js, err := json.Marshal(returnMessage)
@@ -83,12 +90,41 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 
+	case "GET":
+		{
+			//later will change this to id
+			username := r.FormValue("username")
+
+			c := database.DB("explorePhotos").C("users")
+			result := userResponse{}
+			err := c.Find(bson.M{"username": username}).One(&result)
+			if err != nil {
+				returnError := errorMessage{"unsuccess", "no user found"}
+				js, err := json.Marshal(returnError)
+				if err != nil {
+					panic(err)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
+			} else {
+				response := successMessage{"success", result}
+
+				js, err := json.Marshal(response)
+				if err != nil {
+					panic(err)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
+			}
+		}
+
 	case "POST":
 		{
 
 			username := r.PostFormValue("username")
 			password := r.PostFormValue("password")
-			newUser := user{username, password}
+			objectId := bson.NewObjectId()
+			newUser := userResponse{objectId, username, password}
 
 			//check if user is alreayd exist
 			uc := database.DB("explorePhotos").C("users")
@@ -99,7 +135,8 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if result == (user{}) { //register user here
-				err = uc.Insert(&user{Username: username, Password: password})
+
+				err = uc.Insert(&userResponse{Id: objectId, Username: username, Password: password})
 				if err != nil {
 					panic(err)
 				}

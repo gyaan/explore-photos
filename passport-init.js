@@ -8,13 +8,48 @@
 
     // Passport needs to be able to serialize and deserialize users to support persistent login sessions
     passport.serializeUser(function(user, done) {
-      console.log('serializing user:', user.username);
-      return done(null, user.username);
+      console.log('serializing user:', user.Username);
+      return done(null, user.Username);
     });
 
     passport.deserializeUser(function(username, done) {
 
-      return done(null, users[username]);
+      console.log("deserialize the user");
+      //get the user details using apis 
+      var options = {
+          host: "localhost",
+          port: "1334",
+          path: "/users?username="+username,
+          method: "GET",
+        }
+
+        console.log("deserialize the user");
+        var request = http.request(options, function(ress) {
+          var buffer = "",
+            output;
+          ress.on("data", function(chunk) {
+            buffer += chunk;
+          });
+
+          ress.on("end", function(err) {
+            output = JSON.parse(buffer);
+            if (output.Status == "success") { //user is already exist 
+              console.log(output);
+              return done(null, output);
+            } else {
+              return done(null, false)
+            }
+          });
+        });
+
+        request.on('error', function(e) {
+          console.log('problem with request: ' + e.message);
+        });
+
+          
+        // write data to request body
+        // request.write(output);
+        request.end();
 
     });
 
@@ -56,17 +91,6 @@
         var options = {
           host: "localhost",
           port: "1334",
-          path: "/login",
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': data.length
-          }
-        };
-
-        var options2 = {
-          host: "localhost",
-          port: "1334",
           path: "/users",
           method: "POST",
           headers: {
@@ -74,9 +98,6 @@
             'Content-Length': data.length
           }
         }
-
-        console.log('giving request to check if user is already exit or not');
-
 
         var request = http.request(options, function(ress) {
           var buffer = "",
@@ -88,7 +109,10 @@
           ress.on("end", function(err) {
             output = JSON.parse(buffer);
             if (output.Status == "success") { //user is already exist 
-              return done(null, false);
+              console.log(output.User);
+              return done(null, output.User);
+            } else {
+              return done(null, false)
             }
           });
         });
@@ -97,41 +121,10 @@
           console.log('problem with request: ' + e.message);
         });
 
-        request.end();
-        console.log('user is not in system lets register him');
-        //give another reques to register user 
-
-        var registerRequest = http.request(options2, function(ress) {
-     console.log('stroing the user');
-
-          var buffer = "",
-            output;
-          ress.on("data", function(chunk) {
-            buffer += chunk;
-          });
-
-          ress.on("end", function(err) {
-            output = JSON.parse(buffer);
-            
-            console.log(output)
-            if (output.Status == "success") { //user is already exist 
-              return done(null, output.User);
-            }
-            else{
-              return done(null, false);
-            }
-          });
-        });
-
-        registerRequest.on('error', function(e) {
-          console.log('problem with request: ' + e.message);
-        });
-
-        registerRequest.end();
-        registerRequest.write(output);
-
+          
         // write data to request body
-        // request.write(data);
+        request.write(data);
+        request.end();
 
         /*
                 //check if user is there or not 
