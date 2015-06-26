@@ -33,7 +33,8 @@ type photo struct {
 	Ispublic int    `json:ispublic`
 	Isfriend int    `json:isfriend`
 	Isfmaily int    `json:isfmaily`
-	Url      string `jsone:url`
+	Url      string `json:url`
+	ThumbUrl string `json:thumbUrl`
 }
 
 func main() {
@@ -81,8 +82,8 @@ func main() {
 
 	for _, photo := range p.Photos.Photo {
 
-		photo.Url = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + ".jpg"
-
+		photo.Url = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + "_b.jpg"
+		photo.ThumbUrl = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + "_n.jpg"
 		err = uc.Insert(photo)
 		if err != nil {
 			panic(err)

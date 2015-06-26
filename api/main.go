@@ -36,8 +36,9 @@ type photosResponse struct {
 }
 
 type photo struct {
-	Id  bson.ObjectId `bson:"_id,omitempty"`
-	Url string        `json:url`
+	Id       bson.ObjectId `bson:"_id,omitempty"`
+	Url      string        `json:url`
+	ThumbUrl string        `json:url`
 }
 
 var database *mgo.Session
@@ -182,7 +183,7 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 
 			c := database.DB("explorePhotos").C("photos")
 			result := []photo{}
-			err := c.Find(bson.M{}).Limit(10).All(&result)
+			err := c.Find(bson.M{}).Limit(51).All(&result)
 			if err != nil {
 				panic(err)
 			}
