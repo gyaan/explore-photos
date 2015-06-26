@@ -1,5 +1,8 @@
 var app = angular.module('explorePhotos', ['ngRoute', 'ngResource']).run(function($http,$rootScope) {
+  
+  
   $rootScope.authenticated = false;
+  
   $rootScope.current_user = 'Guest';
   
    $rootScope.signout = function(){
@@ -34,10 +37,14 @@ app.factory('photosService', function($resource){
 	return $resource('/api/photos/:id');
 });
 
+app.factory('votesService', function($resource){
+  return $resource('/api/votes/:id');
+});
+
+
 app.controller('mainController', function($scope, $http, $rootScope, $location,photosService){
 	
     $scope.photos=photosService.query();
-
     console.log($scope.photos);
 });
 
@@ -50,7 +57,7 @@ app.controller('authController', function($scope, $http, $rootScope, $location){
 
         	if(data.state=='success'){
         		$rootScope.authenticated = true;
-        		$rootScope.current_user=data.user.username;
+        		$rootScope.current_user=data.user.Username;
         		$location.path('/');
         	}
         	else{
@@ -65,7 +72,9 @@ app.controller('authController', function($scope, $http, $rootScope, $location){
          $http.post('auth/signup',$scope.user).success(function(data){
             if(data.state=='success'){
                 $rootScope.authenticated = true;
-        		$rootScope.current_user=data.user.username;
+                console.log(data);
+                console.log($rootScope.authenticated);
+        		$rootScope.current_user=data.user.Username;
         		$location.path('/');	
                }
                else{
