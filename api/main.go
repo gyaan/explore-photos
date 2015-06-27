@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -31,14 +33,30 @@ type successMessage struct {
 }
 
 type photosResponse struct {
-	Status string  `json:status`
-	Photos []photo `json:photos`
+	Status      string  `json:status`
+	NextPage    string  `json:nextPage`
+	TotalPhotos int     `json:totalPhotos`
+	TotalPages  int     `json:totalPages`
+	Photos      []photo `json:photos`
 }
 
 type photo struct {
 	Id       bson.ObjectId `bson:"_id,omitempty"`
 	Url      string        `json:url`
-	ThumbUrl string        `json:url`
+	ThumbUrl string        `json:thumbUrl`
+	Title    string        `json:title`
+}
+
+type vote struct {
+	Id      bson.ObjectId `bson:"_id,omitempty"`
+	PhotoId string        `json:photoId`
+	UserId  string        `json:userId`
+	Value   int           `json:value`
+}
+
+type votesResponse struct {
+	Status string `json:status`
+	Vote   vote   `json:vote`
 }
 
 var database *mgo.Session
@@ -181,21 +199,80 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		{
 
+			var currentPage int
+			var err error
+			perPagePhotos := int(51)
+			//get current page
+			requestPage := r.FormValue("current_page")
+
+			if len(requestPage) > 0 {
+				currentPage, err = strconv.Atoi(requestPage)
+
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				currentPage = 1
+			}
+
 			c := database.DB("explorePhotos").C("photos")
-			result := []photo{}
-			err := c.Find(bson.M{}).Limit(51).All(&result)
+
+			//get the total number of photos
+			totalPhotos, err := c.Count()
+
 			if err != nil {
 				panic(err)
 			}
 
-			response := photosResponse{"success", result}
+			// fmt.Println(currentPage) //r
 
-			js, err := json.Marshal(response)
-			if err != nil {
-				panic(err)
+			// fmt.Println(reflect.TypeOf(totalPhotos).Kind()) //r
+
+			totalNumberOfPhotos := float64(totalPhotos)
+
+			perPagePhotosC := float64(perPagePhotos)
+			totalNumberOfPages := math.Ceil(totalNumberOfPhotos / perPagePhotosC)
+
+			//if given page is more then total number of pages
+			if currentPage > int(totalNumberOfPages) {
+
+				returnError := errorMessage{"unsuccess", "page doesn't exit"}
+				js, err := json.Marshal(returnError)
+				if err != nil {
+					panic(err)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
+			} else {
+				// fmt.Println(totalNumberOfPages) //r
+
+				//calculate offset
+				offset := (currentPage - 1) * perPagePhotos
+
+				result := []photo{}
+				err = c.Find(bson.M{}).Skip(offset).Limit(51).All(&result)
+				if err != nil {
+					panic(err)
+				}
+
+				var nextPageUrl string
+				if currentPage+1 <= int(totalNumberOfPages) {
+
+					nextPageUrl = "/photos?current_page=" + strconv.Itoa(currentPage+1)
+				} else {
+					nextPageUrl = ""
+				}
+
+				response := photosResponse{"success", nextPageUrl, int(totalNumberOfPhotos), int(totalNumberOfPages), result}
+
+				js, err := json.Marshal(response)
+				if err != nil {
+					panic(err)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
 			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(js)
+
 		}
 
 	case "POST":
@@ -206,6 +283,77 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 	case "DELETE":
 		{ // Remove the record.
 			fmt.Println("inside delete method")
+		}
+
+	default:
+		{
+			fmt.Println("no method defined")
+		}
+	}
+
+}
+
+func votesHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+
+	case "POST":
+		{
+
+			photoId := r.PostFormValue("photo_id")
+			userId := r.PostFormValue("user_id")
+			value := r.PostFormValue("value")
+
+			objectId := bson.NewObjectId()
+
+			n, errr := strconv.Atoi(value)
+
+			if errr != nil {
+				panic(errr)
+			}
+
+			newVotes := vote{objectId, photoId, userId, n}
+
+			// fmt.Println(newVotes)
+
+			//check if user is alreayd exist
+			uv := database.DB("explorePhotos").C("votes")
+			result := vote{}
+			err := uv.Find(bson.M{"photoId": photoId, "userId": userId}).One(&result)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			if result == (vote{}) { //register user here
+
+				err = uv.Insert(&vote{Id: objectId, PhotoId: photoId, UserId: userId, Value: n})
+				if err != nil {
+					panic(err)
+				}
+				//update the count in photos doc
+
+				returnMessage := votesResponse{"success", newVotes}
+				js, err := json.Marshal(returnMessage)
+				if err != nil {
+					panic(err)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
+
+			} else { //send message user is already exist
+				returnError := errorMessage{"unsuccess", "user already voted"}
+				js, err := json.Marshal(returnError)
+				if err != nil {
+					panic(err)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
+			}
+
+		}
+
+	case "DELETE":
+		{ // Remove the record.
+
 		}
 
 	default:
@@ -231,6 +379,7 @@ func main() {
 	http.HandleFunc("/users", usersHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/photos", photosHandler)
+	http.HandleFunc("/votes", votesHandler)
 	http.ListenAndServe(":1334", nil)
 
 }
