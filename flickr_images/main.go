@@ -10,6 +10,11 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
+//some global const
+
+const perPagePhoto int = 50
+const flickerApiUrl string = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=00b8e8a000238defd8704f7c6bdbe130&format=json&&nojsoncallback=1&text=cute+puppies"
+
 type payload struct {
 	Photos photos `json:photos`
 	Stat   string `json:state`
@@ -37,9 +42,63 @@ type photo struct {
 	ThumbUrl string `json:thumbUrl`
 }
 
+func getFlickrPhotos(pageNumber int) {
+
+	fmt.Println(pageNumber)
+
+	url := flickerApiUrl + "&page=" + strconv.Itoa(pageNumber) + "&per_page=" + strconv.Itoa(perPagePhoto)
+	res, err := http.Get(url)
+
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		panic(err)
+	}
+
+	// fmt.Println(body)
+
+	var p payload
+
+	err = json.Unmarshal([]byte(body), &p)
+
+	if err != nil {
+		panic(err)
+	}
+	addPhotosToDb(p.Photos.Photo)
+}
+
+func addPhotosToDb(Photos []photo) {
+
+	session, err := mgo.Dial("localhost")
+
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	uc := session.DB("explorePhotos").C("photos")
+
+	for _, photo := range Photos {
+
+		photo.Url = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + "_b.jpg"
+		photo.ThumbUrl = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + "_n.jpg"
+		err = uc.Insert(photo)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(photo)
+	}
+
+}
+
 func main() {
 
-	url := "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=00b8e8a000238defd8704f7c6bdbe130&format=json&&nojsoncallback=1&text=cute+puppies"
+	url := flickerApiUrl + "&page=1&per_page=" + strconv.Itoa(perPagePhoto)
 
 	res, err := http.Get(url)
 
@@ -63,32 +122,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	//add first page photos to db
 
-	//store the values to db
+	addPhotosToDb(p.Photos.Photo)
 
-	//create connection with mongo db
+	totalPages := p.Photos.Pages
+	//first page photos we already got lets call go routins for other pages
 
-	//got the total number of pages now you can do same thing forall pages
-	//create a goroutin and run in parallely
-
-	session, err := mgo.Dial("localhost")
-
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-
-	uc := session.DB("explorePhotos").C("photos")
-
-	for _, photo := range p.Photos.Photo {
-
-		photo.Url = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + "_b.jpg"
-		photo.ThumbUrl = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + "_n.jpg"
-		err = uc.Insert(photo)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(photo)
+	for i := 2; i <= totalPages; i++ { //execute this for all pages
+		getFlickrPhotos(i)
 	}
 
 }
