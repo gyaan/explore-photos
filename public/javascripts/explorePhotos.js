@@ -1,4 +1,4 @@
-var app = angular.module('explorePhotos', ['ngRoute', 'ngResource','infinite-scroll']).run(function($http, $rootScope) {
+var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-scroll']).run(function($http, $rootScope) {
 
 
   //first check if user is already loggedin or not 
@@ -16,7 +16,7 @@ var app = angular.module('explorePhotos', ['ngRoute', 'ngResource','infinite-scr
       $rootScope.current_user = data.user.Username;
       $location.path('/');
     } else {
-      $scope.error_message = data.message;
+      $rootScope.error_message = data.message;
     }
 
   });
@@ -49,8 +49,33 @@ app.config(function($routeProvider) {
 
 //similarly we have to do for upvote and downvote
 
-app.factory('photosService', function($resource) {
-  return $resource('/api/photos/:id');
+app.factory('photosService', function($http) {
+  var photosService = function() {
+    this.photos = [];
+    this.busy = false;
+    this.after = 1;
+  };
+
+  photosService.prototype.nextPage = function() {
+    if (this.busy) return;
+    this.busy = true;
+
+    var url = "http://localhost:3000/api/photos?current_page=" + this.after;
+    $http.get(url).success(function(data) {
+      var items = data.Photos;
+      console.log(data.Photos);
+
+      for (var i = 0; i < items.length; i++) {
+        this.photos.push(items[i]);
+      }
+      console.log(data.NextPage);
+      this.after = data.NextPage;
+      this.busy = false;
+    }.bind(this));
+  };
+
+  return photosService;
+
 });
 
 app.factory('votesService', function($resource) {
@@ -59,9 +84,7 @@ app.factory('votesService', function($resource) {
 
 
 app.controller('mainController', function($scope, $http, $rootScope, $location, photosService) {
-
-  $scope.photos = photosService.query();
-  console.log($scope.photos);
+  $scope.photosService = new photosService();
 });
 
 app.controller('authController', function($scope, $http, $rootScope, $location) {

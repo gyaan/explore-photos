@@ -34,7 +34,7 @@ type successMessage struct {
 
 type photosResponse struct {
 	Status      string  `json:status`
-	NextPage    string  `json:nextPage`
+	NextPage    int     `json:nextPage`
 	TotalPhotos int     `json:totalPhotos`
 	TotalPages  int     `json:totalPages`
 	Photos      []photo `json:photos`
@@ -255,15 +255,15 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 					panic(err)
 				}
 
-				var nextPageUrl string
+				var nextPage int
 				if currentPage+1 <= int(totalNumberOfPages) {
 
-					nextPageUrl = "/photos?current_page=" + strconv.Itoa(currentPage+1)
+					nextPage = currentPage + 1
 				} else {
-					nextPageUrl = ""
+					nextPage = -1
 				}
 
-				response := photosResponse{"success", nextPageUrl, int(totalNumberOfPhotos), int(totalNumberOfPages), result}
+				response := photosResponse{"success", nextPage, int(totalNumberOfPhotos), int(totalNumberOfPages), result}
 
 				js, err := json.Marshal(response)
 				if err != nil {
