@@ -70,8 +70,10 @@ div.image_description_content{
 }
 .upvote{
   /*text-decoration:underline;*/
+  cursor: pointer;
 }
 
 .downvote {
  /*text-decoration:underline; */
+ cursor: pointer;
 }
