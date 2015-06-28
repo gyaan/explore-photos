@@ -65,6 +65,7 @@ var database *mgo.Session
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
+
 		username := r.PostFormValue("username")
 		password := r.PostFormValue("password")
 
@@ -203,9 +204,13 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 
 			var currentPage int
 			var err error
-			perPagePhotos := int(30)
+			var orderby string
+
+			perPagePhotos := int(15)
+
 			//get current page
 			requestPage := r.FormValue("current_page")
+			requestorderby := r.FormValue("requestorderby")
 
 			if len(requestPage) > 0 {
 				currentPage, err = strconv.Atoi(requestPage)
@@ -215,6 +220,12 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			} else {
 				currentPage = 1
+			}
+
+			if len(requestorderby) > 0 {
+				orderby = "-" + requestorderby
+			} else {
+				orderby = "-upvotescount"
 			}
 
 			c := database.DB("explorePhotos").C("photos")
@@ -252,7 +263,7 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 				offset := (currentPage - 1) * perPagePhotos
 
 				result := []photo{}
-				err = c.Find(bson.M{}).Skip(offset).Limit(51).All(&result)
+				err = c.Find(bson.M{}).Sort(orderby).Skip(offset).Limit(51).All(&result)
 				if err != nil {
 					panic(err)
 				}
@@ -324,7 +335,9 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 			//check if user is alreayd exist
 			uv := database.DB("explorePhotos").C("votes")
 			result := vote{}
-			err = uv.Find(bson.M{"photoId": photoId, "userId": userId}).One(&result)
+			err = uv.Find(bson.M{"photoid": photoId, "userid": userId}).One(&result)
+			fmt.Println(result)
+
 			if err != nil {
 				fmt.Println(err)
 			}

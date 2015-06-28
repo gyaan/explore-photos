@@ -2,8 +2,8 @@ var express = require('express');
 var router = express.Router();
 var http = require('http');
 var querystring = require('querystring');
-/*
-//Used for routes that must be authenticated.
+
+
 function isAuthenticated (req, res, next) {
 
 	if (req.isAuthenticated()){
@@ -11,11 +11,11 @@ function isAuthenticated (req, res, next) {
 	}
 
     // if the user is not authenticated then redirect him to the login page
-    return res.redirect('/#login');
+    return res.send("user is not logged in");
 };
 
 //Register the authentication middleware
-router.use('/photos', isAuthenticated);
+/*router.use('/photos', isAuthenticated);
 */
 router.route('/photos')
 
@@ -47,7 +47,7 @@ router.route('/photos')
 				// console.log(output);
 				res.send(output);
 			} else {
-				res.send("some problem while getting the images");
+				res.send("user already voted this photo");
 			}
 		});
 	});
@@ -80,6 +80,10 @@ router.route('/photos/:id')
 })
 
 //define Content-Type:application/json while giving the request 
+
+//user should logged in for vote
+router.use('/votes', isAuthenticated);
+
 router.route('/votes')
 
 .post(function(req, res) {
@@ -148,5 +152,6 @@ router.route('/islogin')
 		});
 	}
 })
+
 
 module.exports = router;

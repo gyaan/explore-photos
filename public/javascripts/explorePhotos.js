@@ -60,7 +60,7 @@ app.factory('photosService', function($http) {
   photosService.prototype.nextPage = function() {
     if (this.busy) return;
 
-    if (this.after < 1)
+    if (this.after < 1) //stop when there is no page
       return
     this.busy = true;
 
@@ -72,12 +72,10 @@ app.factory('photosService', function($http) {
       for (var i = 0; i < items.length; i++) {
         this.photos.push(items[i]);
       }
-      console.log(data.NextPage);
+      // console.log(data.NextPage);
       this.after = data.NextPage;
       this.busy = false;
-      $("img.lazy").lazyload({
-        placeholder: "./images/ajax_loader.gif"
-      });
+
 
     }.bind(this));
   };
