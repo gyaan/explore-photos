@@ -445,10 +445,6 @@ func main() {
 
 	database = session
 
-	photoids := getvotedPhotosOfUser("1212")
-
-	fmt.Println(photoids)
-
 	http.HandleFunc("/users", usersHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/photos", photosHandler)

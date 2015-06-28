@@ -4,8 +4,8 @@ var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-sc
   $rootScope.current_user = 'Guest';
 
   $rootScope.user = {};
-  // $rootScope.photoOrder='upvotescount'
-  $rootScope.photoOrder='downvotescount'
+  $rootScope.photoOrder='upvotescount'
+
   //first check if user is already loggedin or not 
   $http.get('/api/islogin').success(function(data) {
 
@@ -73,7 +73,6 @@ app.factory('photosService', function($http,$rootScope) {
       // console.log(data.NextPage);
       this.after = data.NextPage;
       this.busy = false;
-
 
     }.bind(this));
   };
@@ -161,6 +160,16 @@ app.controller('authController', function($scope, $http, $rootScope, $location) 
     });
 
   };
+});
+
+
+app.directive('colorbox', function() {
+  return {   
+    restrict: 'AC',    
+    link: function (scope, element, attrs) {        
+      $(element).colorbox(attrs.colorbox);     
+    }
+  };  
 });
 
 /* apart form angulr */
