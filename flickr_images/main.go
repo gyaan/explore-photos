@@ -29,17 +29,19 @@ type photos struct {
 }
 
 type photo struct {
-	Id       string `json: "id"`
-	Owner    string `json:owner`
-	Secret   string `json:secret`
-	Server   string `json:server`
-	Farm     int    `json:farm`
-	Title    string `json:title`
-	Ispublic int    `json:ispublic`
-	Isfriend int    `json:isfriend`
-	Isfmaily int    `json:isfmaily`
-	Url      string `json:url`
-	ThumbUrl string `json:thumbUrl`
+	Id             string `json: id`
+	Owner          string `json:owner`
+	Secret         string `json:secret`
+	Server         string `json:server`
+	Farm           int    `json:farm`
+	Title          string `json:title`
+	Ispublic       int    `json:ispublic`
+	Isfriend       int    `json:isfriend`
+	Isfmaily       int    `json:isfmaily`
+	Url            string `json:url`
+	ThumbUrl       string `json:thumbUrl`
+	UpVotesCount   int    `json:upVotesCount`
+	DownVotesCount int    `json:downVotesCount`
 }
 
 func getFlickrPhotos(pageNumber int) {
@@ -87,6 +89,9 @@ func addPhotosToDb(Photos []photo) {
 
 		photo.Url = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + "_b.jpg"
 		photo.ThumbUrl = "https://farm" + strconv.Itoa(photo.Farm) + ".staticflickr.com/" + photo.Server + "/" + photo.Id + "_" + photo.Secret + "_n.jpg"
+		photo.UpVotesCount = 0
+		photo.DownVotesCount = 0
+
 		err = uc.Insert(photo)
 		if err != nil {
 			panic(err)

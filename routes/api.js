@@ -22,12 +22,12 @@ router.route('/photos')
 /* GET photos listing. */
 .get(function(req, res) {
 
-    var pageNumber = req.query.current_page
-	//get the user details using apis 
+	var pageNumber = req.query.current_page
+		//get the user details using apis 
 	var options = {
 		host: "localhost",
 		port: "1334",
-		path: "/photos?current_page="+pageNumber,
+		path: "/photos?current_page=" + pageNumber,
 		method: "GET",
 	}
 
@@ -79,69 +79,58 @@ router.route('/photos/:id')
 	});
 })
 
-module.exports = router;
-
-
-
 //define Content-Type:application/json while giving the request 
 router.route('/votes')
-	.post(function(req, res) {
 
-		var data = querystring.stringify({
-			'photo_id': req.body.photo_id,
-			'user_id': req.body.user_id,
-			'value': req.body.vote
-		});
+.post(function(req, res) {
+	var postData = querystring.stringify({
+		'user_id': req.body.user_id,
+		'photo_id': req.body.photo_id,
+		'value': req.body.vote
+	});
 
-
-
-		console.log(data);
-
-		//get the user details using apis 
-		var opt = {
-			host: "localhost",
-			port: "1334",
-			path: "/votes",
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Content-Length': data.length
-			}
+	var options = {
+		hostname: 'localhost',
+		port: 1334,
+		path: '/votes',
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Content-Length': postData.length
 		}
+	};
 
-		var request1 = http.request(opt, function(ress) {
+     console.log(options);
 
-			console.log("some problem is here");
+	var req = http.request(options, function(ress) {
 
-			var buffer = "",
-				output;
-			ress.on("data", function(chunk) {
-				buffer += chunk;
-			});
-
-			ress.on("end", function(err) {
-				output = JSON.parse(buffer);
-
-				if (output.Status == "success") {
-					res.send(output.Vote);
-				} else {
-					res.send("some problem while updating votes count");
-				}
-			});
+		var output, buffer = '';
+		ress.on('data', function(chunk) {
+			buffer += chunk;
 		});
 
-		request1.on('error', function(e) {
-			console.log('problem with request: ' + e.message);
+		ress.on("end", function(err) {
+			output = JSON.parse(buffer);
+
+			if (output.Status == "success") {
+				console.log(output);
+				res.send(output.Vote);
+			} else {
+				res.send("some problem while voting a image");
+			}
 		});
+	});
 
-		console.log(opt);
-		// write data to request body
-		// request1.write(options);
+	req.on('error', function(e) {
+		console.log('problem with request: ' + e.message);
+	});
 
+	// write data to request body
+	req.write(postData);
+	req.end();
+	// res.send("some problem while updating votes count");
+})
 
-		request1.end();
-		// res.send("some problem while updating votes count");
-	})
 
 router.route('/islogin')
 
@@ -159,3 +148,5 @@ router.route('/islogin')
 		});
 	}
 })
+
+module.exports = router;

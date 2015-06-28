@@ -7,13 +7,14 @@ var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-sc
   $rootScope.authenticated = false;
 
   $rootScope.current_user = 'Guest';
-
+  $rootScope.user = {};
 
   $http.get('/api/islogin').success(function(data) {
 
     if (data.state == 'success') {
       $rootScope.authenticated = true;
       $rootScope.current_user = data.user.Username;
+      $rootScope.user = data.user;
       $location.path('/');
     } else {
       $rootScope.error_message = data.message;
@@ -58,6 +59,9 @@ app.factory('photosService', function($http) {
 
   photosService.prototype.nextPage = function() {
     if (this.busy) return;
+
+    if (this.after < 1)
+      return
     this.busy = true;
 
     var url = "http://localhost:3000/api/photos?current_page=" + this.after;
@@ -78,13 +82,37 @@ app.factory('photosService', function($http) {
 
 });
 
-app.factory('votesService', function($resource) {
-  return $resource('/api/votes/:id');
-});
+// app.factory('votesService', function($resource) {
+//   return $resource('/api/votes/:id');
+// });
 
 
 app.controller('mainController', function($scope, $http, $rootScope, $location, photosService) {
   $scope.photosService = new photosService();
+
+  $scope.votesMe = function($event, vote) {
+
+    var item = $event.target;
+    var voteDetails = {
+      'user_id': $rootScope.user.Id,
+      'photo_id': item.attributes['data-photo_id'].value,
+      'vote': vote
+    };
+
+    $http.post('/api/votes', voteDetails).success(function(data) {
+
+      if (data.state == 'success') {
+        //add photoid to votedphoto list 
+        console.log(data.Vote);
+
+      } else {
+        $scope.error_message = data.message;
+      }
+
+    });
+
+  }
+
 });
 
 app.controller('authController', function($scope, $http, $rootScope, $location) {
@@ -100,6 +128,7 @@ app.controller('authController', function($scope, $http, $rootScope, $location) 
       if (data.state == 'success') {
         $rootScope.authenticated = true;
         $rootScope.current_user = data.user.Username;
+        $rootScope.user = data.user;
         $location.path('/');
       } else {
         $scope.error_message = data.message;
@@ -116,6 +145,7 @@ app.controller('authController', function($scope, $http, $rootScope, $location) 
         console.log(data);
         console.log($rootScope.authenticated);
         $rootScope.current_user = data.user.Username;
+        $rootScope.user = data.user;
         $location.path('/');
       } else {
         $scope.error_message = data.message;

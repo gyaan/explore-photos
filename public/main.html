@@ -9,19 +9,21 @@
                     
                     <div class='image_description'>
                     <div class='image_description_content'>
-    <b>The pack, the basic unit of wolf social life, is usually a family group.</b>  
+    <b>{{photo.Title}}</b>  
                     
                     </div>  
                     </div>
                     </div>
 
                     </a>
-                    <!-- <div id="upvote_{{photo.Id}}" class="upvote" data-id="{{photo.Id}}"> -->
-                        <!-- upvote -->
-                    <!-- </div> -->
-                    <!-- <div id="upvote_{{photo.Id}}" class="downvote" data-id="{{photo.Id}}"> -->
-                        <!-- downvote -->
-                    <!-- </div> -->
+                    <div class="updownvote" style="height:50px;background:#fff;">
+                    <div id="upvote_{{photo.Id}}" ng-click="votesMe($event,1)"class="upvote" data-photo_id="{{photo.Id}}" style="float:left">
+                        <span ng-if="photo.UpVotesCount > 0">&#8593;{{photo.UpVotesCount}}&nbsp;</span><span ng-show="authenticated">upvote</span>
+                    </div>
+                    <div id="upvote_{{photo.Id}}" ng-click="votesMe($event,-1)" class="downvote" data-photo_id="{{photo.Id}}" style="float:right">
+                        <span ng-if="photo.DownVotesCount > 0"> &#8595; {{photo.DownVotesCount}}</span><span ng-show="authenticated">&nbsp;downvote</span>
+                    </div>
+                    </div>
                 </div>
     	      </div>
     	      </div>

@@ -68,6 +68,10 @@ div.image_description{
 div.image_description_content{  
     padding:10px;  
 }
+.upvote{
+  /*text-decoration:underline;*/
+}
 
-
-
+.downvote {
+ /*text-decoration:underline; */
+}

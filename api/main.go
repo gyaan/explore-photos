@@ -41,10 +41,12 @@ type photosResponse struct {
 }
 
 type photo struct {
-	Id       bson.ObjectId `bson:"_id,omitempty"`
-	Url      string        `json:url`
-	ThumbUrl string        `json:thumbUrl`
-	Title    string        `json:title`
+	Id             string `json:id`
+	Url            string `json:url`
+	ThumbUrl       string `json:thumbUrl`
+	Title          string `json:title`
+	UpVotesCount   int    `json:upvotescount`
+	DownVotesCount int    `json:downvotescount`
 }
 
 type vote struct {
@@ -201,7 +203,7 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 
 			var currentPage int
 			var err error
-			perPagePhotos := int(51)
+			perPagePhotos := int(30)
 			//get current page
 			requestPage := r.FormValue("current_page")
 
@@ -299,9 +301,15 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		{
 
-			photoId := r.PostFormValue("photo_id")
-			userId := r.PostFormValue("user_id")
-			value := r.PostFormValue("value")
+			err := r.ParseForm()
+			if err != nil {
+				panic(err)
+			}
+
+			fmt.Println(r)
+			photoId := r.FormValue("photo_id")
+			userId := r.FormValue("user_id")
+			value := r.FormValue("value")
 
 			objectId := bson.NewObjectId()
 
@@ -313,12 +321,10 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 
 			newVotes := vote{objectId, photoId, userId, n}
 
-			// fmt.Println(newVotes)
-
 			//check if user is alreayd exist
 			uv := database.DB("explorePhotos").C("votes")
 			result := vote{}
-			err := uv.Find(bson.M{"photoId": photoId, "userId": userId}).One(&result)
+			err = uv.Find(bson.M{"photoId": photoId, "userId": userId}).One(&result)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -330,6 +336,34 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 					panic(err)
 				}
 				//update the count in photos doc
+
+				up := database.DB("explorePhotos").C("photos")
+
+				if n == 1 {
+					change := mgo.Change{
+						Update:    bson.M{"$inc": bson.M{"upvotescount": 1}},
+						ReturnNew: true,
+					}
+					doc := photo{}
+					info, err := up.Find(bson.M{"id": photoId}).Apply(change, &doc)
+					fmt.Println(info)
+
+					if err != nil {
+						panic(err)
+					}
+				} else {
+					change := mgo.Change{
+						Update:    bson.M{"$inc": bson.M{"downvotescount": 1}},
+						ReturnNew: true,
+					}
+					doc := photo{}
+					info, err := up.Find(bson.M{"id": photoId}).Apply(change, &doc)
+					fmt.Println(info)
+
+					if err != nil {
+						panic(err)
+					}
+				}
 
 				returnMessage := votesResponse{"success", newVotes}
 				js, err := json.Marshal(returnMessage)
@@ -353,7 +387,7 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 
 	case "DELETE":
 		{ // Remove the record.
-
+			fmt.Println("no method defined")
 		}
 
 	default:
