@@ -17,11 +17,11 @@
 
                     </a>
                     <div class="updownvote" style="height:50px;background:#fff;">
-                    <div id="upvote_{{photo.Id}}" ng-click="votesMe($event,1)"class="upvote" data-photo_id="{{photo.Id}}" style="float:left">
-                        <span ng-if="photo.UpVotesCount > 0">&#8593;{{photo.UpVotesCount}}&nbsp;</span><span ng-show="authenticated">upvote</span>
+                    <div id="upvote_{{photo.Id}}" class="upvote"  style="float:left">
+                        <span ng-if="photo.UpVotesCount > 0">&#8593;{{photo.UpVotesCount}}&nbsp;</span><span ng-show="authenticated" ng-click="votesMe($event,1)" data-photoid="{{photo.Id}}">upvote</span>
                     </div>
-                    <div id="upvote_{{photo.Id}}" ng-click="votesMe($event,-1)" class="downvote" data-photo_id="{{photo.Id}}" style="float:right">
-                        <span ng-if="photo.DownVotesCount > 0"> &#8595; {{photo.DownVotesCount}}</span><span ng-show="authenticated">&nbsp;downvote</span>
+                    <div id="upvote_{{photo.Id}}" ng-click="votesMe($event,-1)" class="downvote" data-photoid="{{photo.Id}}" style="float:right">
+                        <span ng-if="photo.DownVotesCount > 0"> &#8595; {{photo.DownVotesCount}}</span><span ng-show="authenticated" ng-click="votesMe($event,1)" data-photoid="{{photo.Id}}">&nbsp;downvote</span>
                     </div>
                     </div>
                 </div>

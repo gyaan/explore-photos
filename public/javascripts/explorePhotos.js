@@ -1,4 +1,4 @@
-var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-scroll']).run(function($http, $rootScope) {
+var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-scroll']).run(function($http, $rootScope,$location) {
 
 
   //first check if user is already loggedin or not 
@@ -67,7 +67,7 @@ app.factory('photosService', function($http) {
     var url = "http://localhost:3000/api/photos?current_page=" + this.after;
     $http.get(url).success(function(data) {
       var items = data.Photos;
-      console.log(data.Photos);
+      // console.log(data.Photos);
 
       for (var i = 0; i < items.length; i++) {
         this.photos.push(items[i]);
@@ -93,9 +93,11 @@ app.controller('mainController', function($scope, $http, $rootScope, $location, 
   $scope.votesMe = function($event, vote) {
 
     var item = $event.target;
+    console.log($event.target);
+
     var voteDetails = {
       'user_id': $rootScope.user.Id,
-      'photo_id': item.attributes['data-photo_id'].value,
+      'photo_id': item.attributes['data-photoid'].value,
       'vote': vote
     };
 
