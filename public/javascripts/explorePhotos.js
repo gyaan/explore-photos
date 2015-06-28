@@ -1,14 +1,12 @@
 var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-scroll']).run(function($http, $rootScope, $location) {
 
-
-  //first check if user is already loggedin or not 
-
-
   $rootScope.authenticated = false;
-
   $rootScope.current_user = 'Guest';
-  $rootScope.user = {};
 
+  $rootScope.user = {};
+  // $rootScope.photoOrder='upvotescount'
+  $rootScope.photoOrder='downvotescount'
+  //first check if user is already loggedin or not 
   $http.get('/api/islogin').success(function(data) {
 
     if (data.state == 'success') {
@@ -50,7 +48,7 @@ app.config(function($routeProvider) {
 
 //similarly we have to do for upvote and downvote
 
-app.factory('photosService', function($http) {
+app.factory('photosService', function($http,$rootScope) {
   var photosService = function() {
     this.photos = [];
     this.busy = false;
@@ -64,7 +62,7 @@ app.factory('photosService', function($http) {
       return
     this.busy = true;
 
-    var url = "http://localhost:3000/api/photos?current_page=" + this.after;
+    var url = "http://localhost:3000/api/photos?current_page=" + this.after+"&requestorderby="+$rootScope.photoOrder;
     $http.get(url).success(function(data) {
       var items = data.Photos;
       // console.log(data.Photos);
@@ -89,8 +87,13 @@ app.factory('photosService', function($http) {
 // });
 
 
-app.controller('mainController', function($scope, $http, $rootScope, $location, photosService) {
+app.controller('mainController', function($scope, $http, $rootScope, $location, photosService,$route) {
   $scope.photosService = new photosService();
+
+  $scope.changeOrder=function (orderby){
+  $rootScope.photoOrder=orderby;
+  $route.reload();
+  }
 
   $scope.votesMe = function($event, vote) {
 

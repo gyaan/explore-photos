@@ -231,8 +231,8 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 			perPagePhotos := int(15)
 
 			//get current page
-			requestPage := r.FormValue("current_page")
 			requestorderby := r.FormValue("requestorderby")
+			requestPage := r.FormValue("current_page")
 
 			if len(requestPage) > 0 {
 				currentPage, err = strconv.Atoi(requestPage)

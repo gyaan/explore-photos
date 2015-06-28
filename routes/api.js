@@ -23,11 +23,12 @@ router.route('/photos')
 .get(function(req, res) {
 
 	var pageNumber = req.query.current_page
+	var requestorderby = req.query.requestorderby
 		//get the user details using apis 
 	var options = {
 		host: "localhost",
 		port: "1334",
-		path: "/photos?current_page=" + pageNumber,
+		path: "/photos?current_page=" + pageNumber+"&requestorderby="+requestorderby,
 		method: "GET",
 	}
 
