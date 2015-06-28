@@ -4,7 +4,7 @@ var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-sc
   $rootScope.current_user = 'Guest';
 
   $rootScope.user = {};
-  $rootScope.photoOrder='upvotescount'
+  $rootScope.photoOrder = 'upvotescount'
 
   //first check if user is already loggedin or not 
   $http.get('/api/islogin').success(function(data) {
@@ -48,7 +48,7 @@ app.config(function($routeProvider) {
 
 //similarly we have to do for upvote and downvote
 
-app.factory('photosService', function($http,$rootScope) {
+app.factory('photosService', function($http, $rootScope) {
   var photosService = function() {
     this.photos = [];
     this.busy = false;
@@ -62,7 +62,7 @@ app.factory('photosService', function($http,$rootScope) {
       return
     this.busy = true;
 
-    var url = "http://localhost:3000/api/photos?current_page=" + this.after+"&requestorderby="+$rootScope.photoOrder;
+    var url = "http://localhost:3000/api/photos?current_page=" + this.after + "&requestorderby=" + $rootScope.photoOrder;
     $http.get(url).success(function(data) {
       var items = data.Photos;
       // console.log(data.Photos);
@@ -86,24 +86,29 @@ app.factory('photosService', function($http,$rootScope) {
 // });
 
 
-app.controller('mainController', function($scope, $http, $rootScope, $location, photosService,$route) {
+app.controller('mainController', function($scope, $http, $rootScope, $location, photosService, $route) {
   $scope.photosService = new photosService();
 
-  $scope.changeOrder=function (orderby){
-  $rootScope.photoOrder=orderby;
-  $route.reload();
+  $scope.changeOrder = function(orderby) {
+    $rootScope.photoOrder = orderby;
+    $route.reload();
   }
 
   $scope.votesMe = function($event, vote) {
 
     var item = $event.target;
-    console.log($event.target);
 
     var voteDetails = {
       'user_id': $rootScope.user.Id,
       'photo_id': item.attributes['data-photoid'].value,
       'vote': vote
     };
+
+    //disable buttons
+    var chageme1 = angular.element(document.querySelector('#upvote_' + item.attributes['data-photoid'].value));
+    var chageme2 = angular.element(document.querySelector('#downvote_' + item.attributes['data-photoid'].value));
+    chageme1.attr('class', "makemegreen");
+    chageme2.attr('class', "makemegreen");
 
     $http.post('/api/votes', voteDetails).success(function(data) {
 
@@ -164,12 +169,12 @@ app.controller('authController', function($scope, $http, $rootScope, $location) 
 
 
 app.directive('colorbox', function() {
-  return {   
-    restrict: 'AC',    
-    link: function (scope, element, attrs) {        
-      $(element).colorbox(attrs.colorbox);     
+  return {
+    restrict: 'AC',
+    link: function(scope, element, attrs) {
+      $(element).colorbox(attrs.colorbox);
     }
-  };  
+  };
 });
 
 /* apart form angulr */
