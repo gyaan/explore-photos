@@ -77,3 +77,8 @@ div.image_description_content{
  /*text-decoration:underline; */
  cursor: pointer;
 }
+
+.makemegreen{
+  color: #01DF01;
+  cursor: default;
+}
