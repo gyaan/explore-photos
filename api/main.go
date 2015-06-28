@@ -12,14 +12,15 @@ import (
 )
 
 type user struct {
-	Username string `json:username`
-	Password string `json:password`
-}
-
-type userResponse struct {
 	Id       bson.ObjectId `bson:"_id,omitempty"`
 	Username string        `json:username`
 	Password string        `json:password`
+}
+
+type userResponse struct {
+	Id              bson.ObjectId  `bson:"_id,omitempty"`
+	Username        string         `json:username`
+	UserVotedPhotos map[string]int `json:userVotedPhotos`
 }
 
 type errorMessage struct {
@@ -63,22 +64,42 @@ type votesResponse struct {
 
 var database *mgo.Session
 
+func getvotedPhotosOfUser(userId string) map[string]int {
+
+	fmt.Println(userId)
+	result := []vote{}
+	uc := database.DB("explorePhotos").C("votes")
+	err := uc.Find(bson.M{"userid": userId}).All(&result)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//create hash map
+	returnvalues := make(map[string]int)
+	for _, vote := range result {
+		returnvalues[vote.PhotoId] = 1
+	}
+
+	return returnvalues
+}
+
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 
 		username := r.PostFormValue("username")
 		password := r.PostFormValue("password")
 
-		result := userResponse{}
+		result := user{}
 		uc := database.DB("explorePhotos").C("users")
 		err := uc.Find(bson.M{"username": username, "password": password}).One(&result)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		if result != (userResponse{}) { //register user here
+		if result != (user{}) { //register user here
 
-			existingUser := userResponse{result.Id, username, password}
+			userVotedPhotos := getvotedPhotosOfUser(result.Id.Hex())
+
+			existingUser := userResponse{result.Id, username, userVotedPhotos}
 
 			returnMessage := successMessage{"success", existingUser}
 			js, err := json.Marshal(returnMessage)
@@ -118,7 +139,7 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 			username := r.FormValue("username")
 
 			c := database.DB("explorePhotos").C("users")
-			result := userResponse{}
+			result := user{}
 			err := c.Find(bson.M{"username": username}).One(&result)
 			if err != nil {
 				returnError := errorMessage{"unsuccess", "no user found"}
@@ -129,7 +150,8 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write(js)
 			} else {
-				response := successMessage{"success", result}
+
+				response := successMessage{"success", userResponse{result.Id, result.Username, getvotedPhotosOfUser(result.Id.Hex())}}
 
 				js, err := json.Marshal(response)
 				if err != nil {
@@ -146,7 +168,6 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 			username := r.PostFormValue("username")
 			password := r.PostFormValue("password")
 			objectId := bson.NewObjectId()
-			newUser := userResponse{objectId, username, password}
 
 			//check if user is alreayd exist
 			uc := database.DB("explorePhotos").C("users")
@@ -158,10 +179,11 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 
 			if result == (user{}) { //register user here
 
-				err = uc.Insert(&userResponse{Id: objectId, Username: username, Password: password})
+				err = uc.Insert(&user{Id: objectId, Username: username, Password: password})
 				if err != nil {
 					panic(err)
 				}
+				newUser := userResponse{objectId, username, getvotedPhotosOfUser(result.Id.Hex())}
 				returnMessage := successMessage{"success", newUser}
 				js, err := json.Marshal(returnMessage)
 				if err != nil {
@@ -422,6 +444,10 @@ func main() {
 	defer session.Close()
 
 	database = session
+
+	photoids := getvotedPhotosOfUser("1212")
+
+	fmt.Println(photoids)
 
 	http.HandleFunc("/users", usersHandler)
 	http.HandleFunc("/login", loginHandler)
