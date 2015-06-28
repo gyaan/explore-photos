@@ -3,9 +3,9 @@
     	      <div  ng-repeat=" (key,photo) in photosService.photos track by $index"> 
     	      <div class="col-lg-4 col-md-4 col-xs-6 thumb ">
 
-                    <a class="thumbnail" style="margin-bottom:1px;" href='{{photo.Url}}'>
+                    <a class="thumbnail gallery" style="margin-bottom:1px;" href='{{photo.Url}}'>
                     <div class='image_wrapper'>            
-                   <img class="img-responsive" src='{{photo.ThumbUrl}}' alt="" style="height:300px;width:400px">
+                   <img class="img-responsive lazy" src='{{photo.ThumbUrl}}' alt="" style="height:300px;width:400px">
                     
                     <div class='image_description'>
                     <div class='image_description_content'>
@@ -21,7 +21,7 @@
                         <span ng-if="photo.UpVotesCount > 0">&#8593;{{photo.UpVotesCount}}&nbsp;</span><span ng-show="authenticated" ng-click="votesMe($event,1)" data-photoid="{{photo.Id}}">upvote</span>
                     </div>
                     <div id="upvote_{{photo.Id}}" ng-click="votesMe($event,-1)" class="downvote" data-photoid="{{photo.Id}}" style="float:right">
-                        <span ng-if="photo.DownVotesCount > 0"> &#8595; {{photo.DownVotesCount}}</span><span ng-show="authenticated" ng-click="votesMe($event,1)" data-photoid="{{photo.Id}}">&nbsp;downvote</span>
+                        <span ng-if="photo.DownVotesCount > 0"> &#8595; {{photo.DownVotesCount}}&nbsp;</span><span ng-show="authenticated" ng-click="votesMe($event,1)" data-photoid="{{photo.Id}}">downvote</span>
                     </div>
                     </div>
                 </div>

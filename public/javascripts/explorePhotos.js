@@ -1,4 +1,4 @@
-var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-scroll']).run(function($http, $rootScope,$location) {
+var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-scroll']).run(function($http, $rootScope, $location) {
 
 
   //first check if user is already loggedin or not 
@@ -75,6 +75,10 @@ app.factory('photosService', function($http) {
       console.log(data.NextPage);
       this.after = data.NextPage;
       this.busy = false;
+      $("img.lazy").lazyload({
+        placeholder: "./images/ajax_loader.gif"
+      });
+
     }.bind(this));
   };
 
