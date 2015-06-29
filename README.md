@@ -28,7 +28,7 @@ Features implemented
 
 6. golang to build REST APIs for other services 
 
-How to execute : 
+<b>How to execute :<b> 
 
 run below metioned command one by one :
 
