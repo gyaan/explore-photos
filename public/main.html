@@ -10,7 +10,7 @@
     	      <div  ng-repeat=" (key,photo) in photosService.photos track by $index"> 
     	      <div class="col-lg-4 col-md-4 col-xs-6 thumb ">
 
-                    <a class="thumbnail gallery"  style="margin-bottom:1px;" ng-href='{{photo.Url}}'>
+                    <a class="thumbnail gallery" colorbox="{transition:'fade'}" style="margin-bottom:1px;" ng-href='{{photo.Url}}'>
                     <div class='image_wrapper'>            
                    <img class="img-responsive lazy" ng-src='{{photo.ThumbUrl}}' alt="" style="height:300px;width:400px">
                     
