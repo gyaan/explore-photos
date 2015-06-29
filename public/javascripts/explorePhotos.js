@@ -105,10 +105,14 @@ app.controller('mainController', function($scope, $http, $rootScope, $location, 
     };
 
     //disable buttons
-    var chageme1 = angular.element(document.querySelector('#upvote_' + item.attributes['data-photoid'].value));
-    var chageme2 = angular.element(document.querySelector('#downvote_' + item.attributes['data-photoid'].value));
-    chageme1.attr('class', "makemegreen");
-    chageme2.attr('class', "makemegreen");
+    $($event.target).addClass('makemegreen');
+    if (vote == 1) {
+      var jlo = angular.element($event.target);
+      jlo.parent().next().find('.downvote').addClass('makemegreen');
+    } else {
+      var jlo = angular.element($event.target);
+      jlo.parent().parent().find('.upvote').addClass('makemegreen');
+    }
 
     $http.post('/api/votes', voteDetails).success(function(data) {
 
