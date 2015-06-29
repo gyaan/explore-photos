@@ -34,7 +34,7 @@ run below metioned command one by one :
 
 go get github.com/gyaan/explorePhotos/flickr_images
 
-go run $GOPATH/src/github.com/gyaan/explorePhotos/flickr_image/main.go
+go run $GOPATH/src/github.com/gyaan/explorePhotos/flickr_images/main.go
 
 go get github.com/gyaan/explorePhotos/api
 
