@@ -28,4 +28,26 @@ Features implemented
 
 6. golang to build REST APIs for other services 
 
-How to execute : will update soon	
+How to execute : 
+
+run below metioned command one by one :
+
+go get github.com/gyaan/explorePhotos/flickr_images
+
+go run $GOPATH/src/github.com/gyaan/explorePhotos/flickr_image/main.go
+
+go get github.com/gyaan/explorePhotos/api
+
+go run $GOPATH/src/github.com/gyaan/explorePhotos/api/main.go  >/dev/null 2>&1 &
+
+cd $HOME
+
+git clone https://github.com/gyaan/explorePhotos.git
+
+cd $HOME/explorePhotos
+
+npm install 
+
+npm start  >/dev/null 2>&1 &
+ 
+open url: http://localhost:3000/	
