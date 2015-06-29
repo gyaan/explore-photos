@@ -30,7 +30,7 @@ Features implemented
 
 <b>How to execute :</b> 
 
-<b>Assuming : You have mongo, nodejs and go installed in your local system<b>
+<b>Assuming : You have mongo, nodejs and go installed in your local system</b>
 
 <i>run below metioned command one by one :</i>
 
