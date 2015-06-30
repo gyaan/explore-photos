@@ -30,6 +30,8 @@ Features implemented
 
 <b>How to execute :</b> 
 
+<b>Assuming : You have mongo, nodejs and go installed in your local system</b>
+
 <i>run below metioned command one by one :</i>
 
 go get github.com/gyaan/explorePhotos/flickr_images
