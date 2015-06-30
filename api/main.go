@@ -66,7 +66,6 @@ var database *mgo.Session
 
 func getvotedPhotosOfUser(userId string) map[string]int {
 
-	fmt.Println(userId)
 	result := []vote{}
 	uc := database.DB("explorePhotos").C("votes")
 	err := uc.Find(bson.M{"userid": userId}).All(&result)
@@ -95,7 +94,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 		}
 
-		if result != (user{}) { //register user here
+		if result != (user{}) { //there is valid user
 
 			userVotedPhotos := getvotedPhotosOfUser(result.Id.Hex())
 
@@ -259,10 +258,6 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 
-			// fmt.Println(currentPage) //r
-
-			// fmt.Println(reflect.TypeOf(totalPhotos).Kind()) //r
-
 			totalNumberOfPhotos := float64(totalPhotos)
 
 			perPagePhotosC := float64(perPagePhotos)
@@ -279,7 +274,6 @@ func photosHandler(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write(js)
 			} else {
-				// fmt.Println(totalNumberOfPages) //r
 
 				//calculate offset
 				offset := (currentPage - 1) * perPagePhotos
@@ -354,7 +348,7 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 
 			newVotes := vote{objectId, photoId, userId, n}
 
-			//check if user is alreayd exist
+			//check if user is alreayd voted
 			uv := database.DB("explorePhotos").C("votes")
 			result := vote{}
 			err = uv.Find(bson.M{"photoid": photoId, "userid": userId}).One(&result)
@@ -364,7 +358,7 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 			}
 
-			if result == (vote{}) { //register user here
+			if result == (vote{}) { //till now used didn't vote this photo
 
 				err = uv.Insert(&vote{Id: objectId, PhotoId: photoId, UserId: userId, Value: n})
 				if err != nil {
@@ -408,7 +402,7 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write(js)
 
-			} else { //send message user is already exist
+			} else { //user already voted this photo
 				returnError := errorMessage{"unsuccess", "user already voted"}
 				js, err := json.Marshal(returnError)
 				if err != nil {
