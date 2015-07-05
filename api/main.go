@@ -171,7 +171,7 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 			//check if user is alreayd exist
 			uc := database.DB("explorePhotos").C("users")
 			result := user{}
-			err := uc.Find(bson.M{"username": username, "password": password}).One(&result)
+			err := uc.Find(bson.M{"username": username}).One(&result)
 			if err != nil {
 				fmt.Println(err)
 			}

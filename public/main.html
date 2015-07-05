@@ -1,39 +1,43 @@
-    	<div class="clearfix">
-         <div style="float:left"><h5><b>Explore!!!</b></h5></div>
-         <div style="float:right;margin-right:40px;"><h5> <b>Order by:</b> <span ng-click="changeOrder('upvotescount')" style="cursor:pointer">upvote&#8593;&#8593;</span>&nbsp;
-         <span style="cursor:pointer" ng-click="changeOrder('downvotescount')">downvote&#8595;&#8595;</span></h5>
-         </div>   
-        </div>
-    	    <div class="clearfix">
-
-            <div id="post-stream" infinite-scroll="photosService.nextPage()" infinite-scroll-disabled='photosService.busy' infinite-scroll-distance='1'>
-    	      <div  ng-repeat=" (key,photo) in photosService.photos track by $index"> 
-    	      <div class="col-lg-4 col-md-4 col-xs-6 thumb ">
-
-                    <a class="thumbnail gallery" colorbox="{transition:'fade'}" style="margin-bottom:1px;" ng-href='{{photo.Url}}'>
-                    <div class='image_wrapper'>            
-                   <img class="img-responsive lazy" ng-src='{{photo.ThumbUrl}}' alt="" style="height:300px;width:400px">
-                    
-                    <div class='image_description'>
-                    <div class='image_description_content'>
-    <b>{{photo.Title}}</b>  
-                    
-                    </div>  
+<div class="clearfix">
+    <div style="float:left"><h5><b>Explore!!!</b></h5></div>
+    <div style="float:right;margin-right:40px;"><h5> <b>Order by:</b>
+        <span ng-click="changeOrder('upvotescount')" class="{{photoOrder == 'upvotescount' ? 'orderActive' : 'orderInActive'}}" >Upvotes&#8593;&#8593;</span>&nbsp;
+        <span  class="{{photoOrder == 'downvotescount' ? 'orderActive' : 'orderInActive'}}"  ng-click="changeOrder('downvotescount')">Downvotes&#8595;&#8595;</span></h5>
+    </div>
+</div>
+<div class="clearfix">
+    <div id="post-stream" infinite-scroll="photosService.nextPage()" infinite-scroll-disabled='photosService.busy' infinite-scroll-distance='1'>
+        <div  ng-repeat=" (key,photo) in photosService.photos track by $index">
+            <div class="col-lg-4 col-md-4 col-xs-6 thumb ">
+                <a class="thumbnail gallery" colorbox="{transition:'fade', height:'100px', width:'100px'}" style="margin-bottom:1px;" ng-href='{{photo.Url}}'>
+                    <div class='image_wrapper'>
+                        <img class="img-responsive lazy" ng-src='{{photo.ThumbUrl}}' alt="" style="height:300px;width:400px">
+                        
+                        <div class='image_description'>
+                            <div class='image_description_content'>
+                                <b>{{photo.Title}}</b>
+                                
+                            </div>
+                        </div>
                     </div>
-                    </div>
-
-                    </a>
-                    <div  style="height:50px;background:#fff;">
+                </a>
+                <div  style="height:50px;background:#fff;">
                     <div  style="float:left">
-                        <span ng-if="photo.UpVotesCount > 0">&#8593;{{photo.UpVotesCount}}&nbsp;</span>
-                        <span id="upvote_{{photo.Id}}" class="upvote" ng-show="authenticated" ng-if="user.UserVotedPhotos[photo.Id]!=1" ng-click="votesMe($event,1)" data-photoid="{{photo.Id}}">+upvote</span>
-
+                        <span id="upvote_{{photo.Id}}" class="upvote" ng-show="authenticated" ng-if="user.UserVotedPhotos[photo.Id]!=1" ng-click="votesMe($event,1)" data-photoid="{{photo.Id}}" style="color: #006400;" data-upvotes-count="{{photo.UpVotesCount}}">Upvote</span>
+                        <span  ng-if="photo.UpVotesCount > 0" class="glyphicon glyphicon-thumbs-up" style="color: #006400;"></span>
+                        <span ng-if="photo.UpVotesCount > 0" style="color: #006400;">{{photo.UpVotesCount}}</span>
+                        
                     </div>
                     <div  style="float:right">
-                        <span ng-if="photo.DownVotesCount > 0"> &#8595; {{photo.DownVotesCount}}&nbsp;</span><span id="downvote_{{photo.Id}}"  class="downvote"  ng-show="authenticated" ng-if="user.UserVotedPhotos[photo.Id]!=1" ng-click="votesMe($event,-1)" data-photoid="{{photo.Id}}">-downvote</span>
-                    </div>
+                        
+                        <span id="downvote_{{photo.Id}}"  class="downvote"  ng-show="authenticated" ng-if="user.UserVotedPhotos[photo.Id]!=1" ng-click="votesMe($event,-1)" data-photoid="{{photo.Id}}" style="color: #006400;" data-downvotes-count="{{photo.DownVotesCount}}">Downvote</span>
+                        <span  ng-if="photo.DownVotesCount > 0" class="glyphicon glyphicon-thumbs-down" style="color: #006400;"></span>
+                        <span ng-if="photo.DownVotesCount > 0" style="color: #006400;">{{photo.DownVotesCount}}</span>
+                        
                     </div>
                 </div>
-    	      </div>
-    	      </div>
-    	</div>
+            </div>
+        </div>
+        <div ng-show='photosService.busy' style="color: #006400;">Loading Photos...</div>
+    </div>
+</div>

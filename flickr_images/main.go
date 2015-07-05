@@ -13,7 +13,7 @@ import (
 //some global const
 
 const perPagePhoto int = 50
-const flickerApiUrl string = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=00b8e8a000238defd8704f7c6bdbe130&format=json&&nojsoncallback=1&text=cute+puppies"
+const flickerApiUrl string = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=00b8e8a000238defd8704f7c6bdbe130&format=json&&nojsoncallback=1&tags=cute,pappy&tag_mode=all"
 
 type payload struct {
 	Photos photos `json:photos`
@@ -49,6 +49,8 @@ func getFlickrPhotos(pageNumber int) {
 	fmt.Println(pageNumber)
 
 	url := flickerApiUrl + "&page=" + strconv.Itoa(pageNumber) + "&per_page=" + strconv.Itoa(perPagePhoto)
+
+	fmt.Println(url)
 	res, err := http.Get(url)
 
 	if err != nil {
@@ -96,7 +98,7 @@ func addPhotosToDb(Photos []photo) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(photo)
+		// fmt.Println(photo)
 	}
 
 }

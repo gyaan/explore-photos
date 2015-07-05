@@ -1,84 +1,92 @@
-body {
-	padding-top:70px;
-	width: 100%;
-    height: 100%;
-	width: 100%;
-    height: 100%;
-    font-family: "Source Sans Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
-}
+  body {
+  	padding-top:70px;
+  	width: 100%;
+      height: 100%;
+  	width: 100%;
+      height: 100%;
+      font-family: "Source Sans Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
 
-a {
-	color: #00B7FF;
-}
+  a {
+  	color: #00B7FF;
+  }
 
-.submit-btn {
-	background-color: #b1dbff;
-	margin: 10px 0 10px 0;
-}
+  .submit-btn {
+  	background-color: #b1dbff;
+  	margin: 10px 0 10px 0;
+  }
 
-.post {
-	padding: 10px;
-	margin-bottom: 5px;
-	border-radius: 5px;
-}
+  .post {
+  	padding: 10px;
+  	margin-bottom: 5px;
+  	border-radius: 5px;
+  }
 
-.odd {
-	background-color: #f2f9ff;
-	
-}
-.even {
-	background-color: #eceff3;
-}
+  .odd {
+  	background-color: #f2f9ff;
+  	
+  }
+  .even {
+  	background-color: #eceff3;
+  }
 
-.form-auth {
-	max-width: 330px;
-	padding: 5px;
-	margin: 0 auto;
-}
-.footer {
-  /*position: absolute;*/
-  bottom: 0;
-  width: 100%;
-  height: 60px;
-  background-color: #f5f5f5;
-  margin-top: 10px;
-}
+  .form-auth {
+  	max-width: 330px;
+  	padding: 5px;
+  	margin: 0 auto;
+  }
+  .footer {
+    /*position: absolute;*/
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #f5f5f5;
+    margin-top: 10px;
+  }
 
-.thumb {
-    margin:1px 1px 1px 1px;
-    padding: 1px 1px 1px 1px;
-    width: 32%;
-}
+  .thumb {
+      margin:1px 1px 1px 1px;
+      padding: 1px 1px 1px 1px;
+      width: 32%;
+  }
 
 
-div.image_wrapper{  
-    position:relative; /* important(so we can absolutely position the description div */  
-}  
-div.image_description{  
-    position:absolute; /* absolute position (so we can position it where we want)*/  
-    bottom:0px; /* position will be on bottom */  
-    left:0px;  
-    display:none; /* hide it */  
-    /* styling bellow */  
-    background-color:black;  
-    font-family: 'tahoma';  
-    font-size:15px;  
-    color:white;  
-}  
-div.image_description_content{  
-    padding:10px;  
-}
-.upvote{
-  /*text-decoration:underline;*/
+  div.image_wrapper{  
+      position:relative; /* important(so we can absolutely position the description div */  
+  }  
+  div.image_description{  
+      position:absolute; /* absolute position (so we can position it where we want)*/  
+      bottom:0px; /* position will be on bottom */  
+      left:0px;  
+      display:none; /* hide it */  
+      /* styling bellow */  
+      background-color:black;  
+      font-family: 'tahoma';  
+      font-size:15px;  
+      color:white;  
+  }  
+  div.image_description_content{  
+      padding:10px;  
+  }
+  .upvote{
+    /*text-decoration:underline;*/
+    cursor: pointer;
+  }
+
+  .downvote {
+   /*text-decoration:underline; */
+   cursor: pointer;
+  }
+
+  .makemegreen{
+    color: #01DF01;
+    cursor: default;
+  }
+
+  .orderActive {
+    color: #01DF01;
+    cursor: default; 
+  }
+  .orderInActive{
   cursor: pointer;
-}
-
-.downvote {
- /*text-decoration:underline; */
- cursor: pointer;
-}
-
-.makemegreen{
-  color: #01DF01;
-  cursor: default;
-}
+  }
