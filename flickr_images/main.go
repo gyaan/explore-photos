@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"sync"
+	"time"
 
 	"gopkg.in/mgo.v2"
 )
@@ -13,7 +15,7 @@ import (
 //some global const
 
 const perPagePhoto int = 50
-const flickerApiUrl string = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=00b8e8a000238defd8704f7c6bdbe130&format=json&&nojsoncallback=1&text=cute+puppies"
+const flickerApiUrl string = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=00b8e8a000238defd8704f7c6bdbe130&format=json&nojsoncallback=1&text=puppies"
 
 type payload struct {
 	Photos photos `json:photos`
@@ -46,9 +48,11 @@ type photo struct {
 
 func getFlickrPhotos(pageNumber int) {
 
-	fmt.Println(pageNumber)
+	// fmt.Println(pageNumber)
 
 	url := flickerApiUrl + "&page=" + strconv.Itoa(pageNumber) + "&per_page=" + strconv.Itoa(perPagePhoto)
+
+	// fmt.Println(url)
 	res, err := http.Get(url)
 
 	if err != nil {
@@ -96,7 +100,7 @@ func addPhotosToDb(Photos []photo) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(photo)
+		// fmt.Println(photo)
 	}
 
 }
@@ -127,15 +131,39 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//add first page photos to db
+	// add first page photos to db
 
 	addPhotosToDb(p.Photos.Photo)
 
 	totalPages := p.Photos.Pages
 	//first page photos we already got lets call go routins for other pages
 
-	for i := 2; i <= totalPages; i++ { //execute this for all pages
-		getFlickrPhotos(i)
-	}
+	fmt.Println(totalPages)
 
+	t1 := time.Now()
+
+	//  with go routines
+	var wg sync.WaitGroup
+
+	for i := 2; i <= totalPages; i++ { //execute this for all pages
+
+		println(i, "page number")
+		wg.Add(1)
+		go func(page int) {
+			println(page)
+			defer wg.Done()
+			getFlickrPhotos(page)
+
+		}(i)
+	}
+	wg.Wait()
+
+	/*
+		//without go routines
+		for i := 2; i <= totalPages; i++ { //execute this for all pages
+			getFlickrPhotos(i)
+		}
+	*/
+	t2 := time.Now()
+	fmt.Println("time taken: ", t2.Sub(t1))
 }

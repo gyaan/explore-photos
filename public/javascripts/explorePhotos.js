@@ -1,4 +1,4 @@
-var app = angular.module('explorePhotos', ['ngRoute', 'ngResource', 'infinite-scroll']).run(function($http, $rootScope, $location) {
+var app = angular.module('explorePhotos', ['ngRoute', 'infinite-scroll']).run(function($http, $rootScope, $location) {
 
   $rootScope.authenticated = false;
   $rootScope.current_user = 'Guest';
@@ -81,12 +81,8 @@ app.factory('photosService', function($http, $rootScope) {
 
 });
 
-// app.factory('votesService', function($resource) {
-//   return $resource('/api/votes/:id');
-// });
 
-
-app.controller('mainController', function($scope, $http, $rootScope, $location, photosService, $route) {
+app.controller('mainController', function($scope, $http, $rootScope, $location, photosService, $route, $compile) {
   $scope.photosService = new photosService();
 
   $scope.changeOrder = function(orderby) {
@@ -105,20 +101,42 @@ app.controller('mainController', function($scope, $http, $rootScope, $location, 
     };
 
     //disable buttons
-    $($event.target).addClass('makemegreen');
+    $($event.target).hide();
     if (vote == 1) {
+      //increase the count 
       var jlo = angular.element($event.target);
-      jlo.parent().next().find('.downvote').addClass('makemegreen');
+      var oldCount = parseInt($event.target.attributes['data-upvotes-count'].value);
+
+      if (oldCount > 0) {
+        jlo.next().next().text(oldCount + 1);
+      } else {
+        $compile('<span class="glyphicon glyphicon-thumbs-up" style="color: #006400;"></span> <span style = "color: #006400;"> 1 </span>')($scope).appendTo(jlo.parent());
+      }
+
+      jlo.parent().next().find('.downvote').hide();
+
     } else {
       var jlo = angular.element($event.target);
-      jlo.parent().parent().find('.upvote').addClass('makemegreen');
+
+      var oldCount = parseInt($event.target.attributes['data-downvotes-count'].value)
+
+      if (oldCount > 0) {
+        jlo.next().next().text(oldCount + 1);
+      } else {
+        $compile('<span class="glyphicon glyphicon-thumbs-down" style="color: #006400;"></span> <span style = "color: #006400;"> 1 </span>')($scope).appendTo(jlo.parent());
+      }
+      jlo.parent().parent().find('.upvote').hide();
     }
+
+    //add this photo to user liked photo list 
+    $rootScope.user.UserVotedPhotos[item.attributes['data-photoid'].value]=1;
 
     $http.post('/api/votes', voteDetails).success(function(data) {
 
       if (data.state == 'success') {
         //add photoid to votedphoto list 
         console.log(data.Vote);
+
 
       } else {
         $scope.error_message = data.message;
@@ -182,7 +200,7 @@ app.directive('colorbox', function() {
 });
 
 /* apart form angulr */
-
+/*
 //We are using $(window).load here because we want to wait until the images are loaded  
 $(window).load(function() {
   //for each description div...  
@@ -209,3 +227,4 @@ $(window).load(function() {
   });
 
 });
+*/

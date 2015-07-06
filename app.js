@@ -10,9 +10,7 @@ var api = require('./routes/api');
 var authenticate = require('./routes/authenticate')(passport);
 var mongoose = require('mongoose');
 
- //connect to mongodb 
-// mongoose.connect("mongodb://localhost:27017/explorePhotos");
-
+ 
 var app = express();
 
 // view engine setup
@@ -20,15 +18,21 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
+
+app.use(favicon(__dirname + '/public/favicon.ico'));
+
 app.use(logger('dev'));
+
 app.use(session({
-  secret: 'keyboard cat'
+  secret: 'Gyaneshwar Pardhi'
 }));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -50,6 +54,9 @@ initPassport(passport);
 
 // development error handler
 // will print stacktrace
+
+console.log("enviroment: "+app.get('env'));
+
 if (app.get('env') === 'development') {
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
