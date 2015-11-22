@@ -17,11 +17,13 @@ import (
 const perPagePhoto int = 50
 const flickerApiUrl string = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=00b8e8a000238defd8704f7c6bdbe130&format=json&nojsoncallback=1&text=puppies"
 
+//struct for api response
 type payload struct {
 	Photos photos `json:photos`
 	Stat   string `json:state`
 }
 
+//struct for photos listing
 type photos struct {
 	Page    int     `json:page`
 	Pages   int     `json:pages`
@@ -30,6 +32,7 @@ type photos struct {
 	Photo   []photo `json:photo`
 }
 
+//struct for individual photo
 type photo struct {
 	Id             string `json: id`
 	Owner          string `json:owner`
@@ -46,6 +49,7 @@ type photo struct {
 	DownVotesCount int    `json:downVotesCount`
 }
 
+// this will return photos list per page
 func getFlickrPhotos(pageNumber int) {
 
 	// fmt.Println(pageNumber)
@@ -78,6 +82,7 @@ func getFlickrPhotos(pageNumber int) {
 	addPhotosToDb(p.Photos.Photo)
 }
 
+//to store photos details in mongoDB
 func addPhotosToDb(Photos []photo) {
 
 	session, err := mgo.Dial("localhost")
@@ -132,7 +137,6 @@ func main() {
 		panic(err)
 	}
 	// add first page photos to db
-
 	addPhotosToDb(p.Photos.Photo)
 
 	totalPages := p.Photos.Pages
@@ -140,26 +144,25 @@ func main() {
 
 	fmt.Println(totalPages)
 
+        //bench marking lets see how much time its take 
 	t1 := time.Now()
 
 	//  with go routines
 	var wg sync.WaitGroup
-
+	
 	for i := 2; i <= totalPages; i++ { //execute this for all pages
-
 		println(i, "page number")
 		wg.Add(1)
 		go func(page int) {
 			println(page)
 			defer wg.Done()
-			getFlickrPhotos(page)
-
+			getFlickrPhotos(page) //these functions will execute concurrently 
 		}(i)
 	}
 	wg.Wait()
 
 	/*
-		//without go routines
+		//without go routines to check how much time it takes 
 		for i := 2; i <= totalPages; i++ { //execute this for all pages
 			getFlickrPhotos(i)
 		}
